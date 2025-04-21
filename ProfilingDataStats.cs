@@ -26,6 +26,12 @@ namespace PerformanceProfilerApp
         public int GcGen2Collections { get; set; }
         public float PrivateMemoryUsage { get; set; }
 
+        public float GpuUsagePercent { get; set; }
+        public float GpuTempC { get; set; }
+        public float GpuClockMHz { get; set; }
+        public float GpuMemoryMB { get; set; }
+
+
         public float DiskIO { get; set; }
         public float NetworkUsage { get; set; }
         public int ThreadCount { get; set; }

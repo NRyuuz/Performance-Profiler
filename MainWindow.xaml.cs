@@ -20,13 +20,17 @@ namespace PerformanceProfilerApp
         public ISeries[] CpuSeries { get; set; }
         public ISeries[] MemorySeries { get; set; }
         public ISeries[] DiskSeries { get; set; }
-        public ISeries[] NetworkSeries { get; set; }
+        public ISeries[] NetworkSeries { get; set; }    
         public Axis[] XAxes { get; set; }
         public Axis[] YAxes { get; set; }
 
         private ChartDataManager chartData = new();
         private List<ProfilingDataStats> collectedSamples = new();
         private string selectedProcessName;
+
+        private ObservableCollection<double> gpuValues = new();
+        public ISeries[] GpuSeries { get; set; }
+    
 
         public MainWindow()
         {
@@ -35,14 +39,19 @@ namespace PerformanceProfilerApp
             InitializeCharts();
             DisplaySystemInfo();
             DataContext = this;
+            ProfilerService.BindWindow(this);
+
         }
 
         private void InitializeCharts()
         {
+            LogMessage("Intializing Charts.");
             CpuSeries = new ISeries[] { new LineSeries<double> { Values = chartData.CpuValues, Stroke = new SolidColorPaint(SKColors.LightSkyBlue, 2), GeometrySize = 0 } };
             MemorySeries = new ISeries[] { new LineSeries<double> { Values = chartData.MemoryValues, Stroke = new SolidColorPaint(SKColors.LightGreen, 2), GeometrySize = 0 } };
             DiskSeries = new ISeries[] { new LineSeries<double> { Values = chartData.DiskValues, Stroke = new SolidColorPaint(SKColors.Orange, 2), GeometrySize = 0 } };
             NetworkSeries = new ISeries[] { new LineSeries<double> { Values = chartData.NetworkValues, Stroke = new SolidColorPaint(SKColors.IndianRed, 2), GeometrySize = 0 } };
+            GpuSeries = new ISeries[] { new LineSeries<double> {Values = gpuValues,Stroke = new SolidColorPaint(SKColors.MediumPurple, 2),GeometrySize = 0}};
+            DataContext = this;
 
             XAxes = new Axis[] { new Axis { Labeler = value => $"{value}s", MinLimit = 0, MaxLimit = 60 } };
             YAxes = new Axis[] { new Axis { Labeler = value => $"{value}", MinLimit = 0 } };
@@ -63,10 +72,12 @@ namespace PerformanceProfilerApp
             DrivesList.ItemsSource = info.Drives;
             MotherboardInfo.Text = $"Motherboard: {info.Motherboard}";
             OsExtra.Text = info.OsExtra;
+
         }
 
         private void LoadProcesses()
         {
+            LogMessage("Loading Processes.");
             var grouped = Process.GetProcesses()
                 .Where(p => { try { return !p.HasExited && !string.IsNullOrWhiteSpace(p.ProcessName); } catch { return false; } })
                 .GroupBy(p => p.ProcessName)
@@ -86,12 +97,18 @@ namespace PerformanceProfilerApp
                 MessageBox.Show("Please select a process.");
                 return;
             }
+            ProfilerService.EnableCpu = EnableCpuBox.IsChecked == true;
+            ProfilerService.EnableMemory = EnableMemoryBox.IsChecked == true;
+            ProfilerService.EnableDisk = EnableDiskBox.IsChecked == true;
+            ProfilerService.EnableNetwork = EnableNetworkBox.IsChecked == true;
+            ProfilerService.EnableGpu = EnableGpuBox.IsChecked == true;
 
             ProfilerService.OnSampleReceived += ProfilerService_OnSampleReceived;
             ProfilerService.StartGroup(selectedProcessName);
             collectedSamples.Clear();
             StartButton.IsEnabled = false;
             StopButton.IsEnabled = true;
+            LogMessage("Starting Profiler.");
         }
 
         private void StopButton_Click(object sender, RoutedEventArgs e)
@@ -100,6 +117,7 @@ namespace PerformanceProfilerApp
             ProfilerService.OnSampleReceived -= ProfilerService_OnSampleReceived;
             StartButton.IsEnabled = true;
             StopButton.IsEnabled = false;
+            LogMessage("Stopping Profiler.");
         }
 
         private void SamplingRateComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -111,6 +129,15 @@ namespace PerformanceProfilerApp
                 else if (content.Contains("1000")) ProfilerService.SetSamplingInterval(1000);
                 else if (content.Contains("2000")) ProfilerService.SetSamplingInterval(2000);
             }
+        }
+
+        public void LogMessage(string message)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                OutputLog.AppendText($"[{DateTime.Now:HH:mm:ss}] {message}\n");
+                OutputLog.ScrollToEnd();
+            });
         }
 
         private void ProfilerService_OnSampleReceived(ProfilingDataStats data)
@@ -132,6 +159,13 @@ namespace PerformanceProfilerApp
                 ThreadCountValue.Text = $"Threads: {data.ThreadCount}";
                 ProcessCountValue.Text = $"Running Processes: {data.ProcessCount}";
 
+                GpuValue.Text = $"GPU: {data.GpuUsagePercent:F2} %";
+                GpuTempValue.Text = $"Temp: {data.GpuTempC:F0} °C";
+                GpuClockValue.Text = $"Clock: {data.GpuClockMHz:F0} MHz";
+                GpuMemoryUsedValue.Text = $"Memory: {data.GpuMemoryMB:F0} MB";
+                
+                UpdateSeries(gpuValues, data.GpuUsagePercent);
+
                 VirtualizationValue.Text = $"Virtualization: {data.VirtualizationStatus}";
                 CacheL1Value.Text = $"L1 Cache: {data.L1CacheKB} KB";
                 CacheL2Value.Text = $"L2 Cache: {data.L2CacheKB} KB";
@@ -141,19 +175,33 @@ namespace PerformanceProfilerApp
 
         private void ExportSamples_Click(object sender, RoutedEventArgs e)
         {
+            LogMessage("Exported Samples.");
             ExportService.ExportProfilingSamplesToCsv(collectedSamples);
         }
 
         private void AdvancedToggle_Checked(object sender, RoutedEventArgs e)
         {
+            LogMessage("Advanced Mode Enabled.");
             MemoryAdvancedPanel.Visibility = Visibility.Visible;
             CpuAdvancedPanel.Visibility = Visibility.Visible;
+            GpuAdvancedPanel.Visibility = Visibility.Visible;
+
         }
 
         private void AdvancedToggle_Unchecked(object sender, RoutedEventArgs e)
         {
+            LogMessage("Advanced Mode Disabled.");
             MemoryAdvancedPanel.Visibility = Visibility.Collapsed;
             CpuAdvancedPanel.Visibility = Visibility.Collapsed;
+            GpuAdvancedPanel.Visibility = Visibility.Collapsed;
+
         }
+
+        private void UpdateSeries(ObservableCollection<double> series, double value)
+        {
+            if (series.Count > 60) series.RemoveAt(0);
+            series.Add(value);
+        }
+
     }
 }

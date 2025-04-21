@@ -3,97 +3,167 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
         Title="Performance Profiler" Height="1000" Width="1200" Background="#1E1E1E">
+    <Window.Resources>
+        <Style x:Key="DarkButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#333"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#555"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#444"/>
+                                <Setter Property="BorderBrush" Value="#777"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#555"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
     <Grid>
         <TabControl Background="#1E1E1E" Foreground="White">
             <!-- Performance Tab -->
             <TabItem Header="Performance">
-                <Grid Margin="20">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-
-                    <!-- Top Controls -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0 0 0 10">
-                        <ComboBox x:Name="ProcessComboBox" Width="250" Margin="0,0,10,0"/>
-                        <Button x:Name="StartButton" Content="Start Profiling" Width="120" Margin="0,0,10,0" Click="StartButton_Click"/>
-                        <Button x:Name="StopButton" Content="Stop" Width="80" Click="StopButton_Click" IsEnabled="False"/>
-                        <ComboBox x:Name="SamplingRateComboBox" Width="120" Margin="10,0,10,0" SelectionChanged="SamplingRateComboBox_SelectionChanged">
-                            <ComboBoxItem Content="500 ms"/>
-                            <ComboBoxItem Content="1000 ms" IsSelected="True"/>
-                            <ComboBoxItem Content="2000 ms"/>
-                        </ComboBox>
-                        <Button Content="Export Samples to CSV"
-                        Click="ExportSamples_Click"
-                        Width="200" Margin="0,10,0,0"
-                        Background="#333" Foreground="White" BorderBrush="Gray"
-                        HorizontalAlignment="Left"/>
-
-                        <CheckBox x:Name="AdvancedToggle" Content="Show Advanced" Foreground="White" VerticalAlignment="Center" Checked="AdvancedToggle_Checked" Unchecked="AdvancedToggle_Unchecked" Margin="200,0,0,0"/>
-                    </StackPanel>
-
-                    <!-- Metrics Grid -->
-                    <Grid Grid.Row="1">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <Grid Margin="20">
                         <Grid.RowDefinitions>
-                            <RowDefinition/>
-                            <RowDefinition/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
 
-                        <!-- CPU -->
-                        <Border Grid.Row="0" Grid.Column="0" Background="#252526" CornerRadius="10" Margin="5" Padding="15">
-                            <StackPanel>
-                                <TextBlock Text="CPU Usage" FontSize="18" Foreground="White" Margin="0 0 0 5"/>
-                                <TextBlock x:Name="CpuValue" FontSize="28" Foreground="#4FC3F7" FontWeight="Bold"/>
-                                <lvc:CartesianChart Height="100" Series="{Binding CpuSeries}" XAxes="{Binding XAxes}" YAxes="{Binding YAxes}" LegendPosition="Hidden" Background="Transparent" Foreground="White" Margin="0,10,0,0"/>
-                                <StackPanel x:Name="CpuAdvancedPanel" Margin="0,10,0,0" Visibility="Collapsed">
-                                    <TextBlock x:Name="ThreadCountValue" Foreground="LightGray" FontSize="14"/>
-                                    <TextBlock x:Name="ProcessCountValue" Foreground="LightGray" FontSize="14"/>
-                                    <TextBlock x:Name="VirtualizationValue" Foreground="LightGray" FontSize="14"/>
-                                    <TextBlock x:Name="CacheL1Value" Foreground="LightGray" FontSize="14"/>
-                                    <TextBlock x:Name="CacheL2Value" Foreground="LightGray" FontSize="14"/>
-                                    <TextBlock x:Name="CacheL3Value" Foreground="LightGray" FontSize="14"/>
+                        <!-- Top Controls -->
+                        <StackPanel Orientation="Vertical" Margin="0 0 0 10">
+                            <!-- Row 1: Control Buttons -->
+                            <StackPanel Orientation="Horizontal" Margin="0 0 0 5">
+                                <ComboBox x:Name="ProcessComboBox" Width="250" Margin="0,0,10,0"/>
+                                <Button x:Name="StartButton" Content="Start Profiling" Width="120" Margin="0,0,10,0" Click="StartButton_Click" Style="{StaticResource DarkButtonStyle}"/>
+                                <Button x:Name="StopButton" Content="Stop" Width="80" Margin="0,0,10,0" Click="StopButton_Click" IsEnabled="False" Style="{StaticResource DarkButtonStyle}"/>
+                                <ComboBox x:Name="SamplingRateComboBox" Width="120" Margin="10,0,10,0" SelectionChanged="SamplingRateComboBox_SelectionChanged">
+                                    <ComboBoxItem Content="500 ms"/>
+                                    <ComboBoxItem Content="1000 ms" IsSelected="True"/>
+                                    <ComboBoxItem Content="2000 ms"/>
+                                </ComboBox>
+                                <Button Content="Export Samples to CSV" Click="ExportSamples_Click" Width="200" Margin="0,0,10,0" Style="{StaticResource DarkButtonStyle}"/>
+                                <CheckBox x:Name="AdvancedToggle" Content="Show Advanced" Foreground="White" VerticalAlignment="Center" Checked="AdvancedToggle_Checked" Unchecked="AdvancedToggle_Unchecked"/>
+                            </StackPanel>
+
+                            <!-- Row 2: Metric Checkboxes -->
+                            <StackPanel Orientation="Horizontal" Background="#252526">
+                                <CheckBox x:Name="EnableCpuBox" Content="CPU" Foreground="White" IsChecked="True" Margin="0,0,10,0"/>
+                                <CheckBox x:Name="EnableMemoryBox" Content="Memory" Foreground="White" IsChecked="True" Margin="0,0,10,0"/>
+                                <CheckBox x:Name="EnableDiskBox" Content="Disk" Foreground="White" IsChecked="True" Margin="0,0,10,0"/>
+                                <CheckBox x:Name="EnableNetworkBox" Content="Network" Foreground="White" IsChecked="True" Margin="0,0,10,0"/>
+                                <CheckBox x:Name="EnableGpuBox" Content="GPU" Foreground="White" IsChecked="False" Margin="0,0,10,0"/>
+                            </StackPanel>
+                        </StackPanel>
+
+
+                        <!-- Metrics Grid -->
+                        <Grid Grid.Row="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- CPU -->
+                            <Border Grid.Row="0" Grid.Column="0" Background="#252526" CornerRadius="10" Margin="5" Padding="15">
+                                <StackPanel VerticalAlignment="Top">
+                                    <TextBlock Text="CPU Usage" FontSize="18" Foreground="White" Margin="0 0 0 5"/>
+                                    <TextBlock x:Name="CpuValue" FontSize="28" Foreground="#4FC3F7" FontWeight="Bold"/>
+                                    <lvc:CartesianChart Height="100" Series="{Binding CpuSeries}" XAxes="{Binding XAxes}" YAxes="{Binding YAxes}" LegendPosition="Hidden" Background="Transparent" Foreground="White" Margin="0,10,0,0"/>
+                                    <StackPanel x:Name="CpuAdvancedPanel" Margin="0,10,0,0" Visibility="Collapsed">
+                                        <TextBlock x:Name="ThreadCountValue" Foreground="LightGray" FontSize="14"/>
+                                        <TextBlock x:Name="ProcessCountValue" Foreground="LightGray" FontSize="14"/>
+                                        <TextBlock x:Name="VirtualizationValue" Foreground="LightGray" FontSize="14"/>
+                                        <TextBlock x:Name="CacheL1Value" Foreground="LightGray" FontSize="14"/>
+                                        <TextBlock x:Name="CacheL2Value" Foreground="LightGray" FontSize="14"/>
+                                        <TextBlock x:Name="CacheL3Value" Foreground="LightGray" FontSize="14"/>
+                                    </StackPanel>
                                 </StackPanel>
-                            </StackPanel>
-                        </Border>
+                            </Border>
 
-                        <!-- Memory -->
-                        <Border Grid.Row="0" Grid.Column="1" Background="#252526" CornerRadius="10" Margin="5" Padding="15">
-                            <StackPanel>
-                                <TextBlock Text="Memory Usage" FontSize="18" Foreground="White" Margin="0 0 0 5"/>
-                                <TextBlock x:Name="MemoryValue" FontSize="28" Foreground="#81C784" FontWeight="Bold"/>
-                                <lvc:CartesianChart Height="100" Series="{Binding MemorySeries}" XAxes="{Binding XAxes}" YAxes="{Binding YAxes}" LegendPosition="Hidden" Background="Transparent" Foreground="White" Margin="0,10,0,0"/>
-                                <StackPanel x:Name="MemoryAdvancedPanel" Margin="0,10,0,0" Visibility="Collapsed">
-                                    <TextBlock x:Name="PrivateMemoryValue" Foreground="LightGray" FontSize="14"/>
-                                    <TextBlock x:Name="GcGen0Value" Foreground="LightGray" FontSize="14"/>
-                                    <TextBlock x:Name="GcGen1Value" Foreground="LightGray" FontSize="14"/>
-                                    <TextBlock x:Name="GcGen2Value" Foreground="LightGray" FontSize="14"/>
+                            <!-- Memory -->
+                            <Border Grid.Row="0" Grid.Column="1" Background="#252526" CornerRadius="10" Margin="5" Padding="15">
+                                <StackPanel VerticalAlignment="Top">
+                                    <TextBlock Text="Memory Usage" FontSize="18" Foreground="White" Margin="0 0 0 5"/>
+                                    <TextBlock x:Name="MemoryValue" FontSize="28" Foreground="#81C784" FontWeight="Bold"/>
+                                    <lvc:CartesianChart Height="100" Series="{Binding MemorySeries}" XAxes="{Binding XAxes}" YAxes="{Binding YAxes}" LegendPosition="Hidden" Background="Transparent" Foreground="White" Margin="0,10,0,0"/>
+                                    <StackPanel x:Name="MemoryAdvancedPanel" Margin="0,10,0,0" Visibility="Collapsed">
+                                        <TextBlock x:Name="PrivateMemoryValue" Foreground="LightGray" FontSize="14"/>
+                                        <TextBlock x:Name="GcGen0Value" Foreground="LightGray" FontSize="14"/>
+                                        <TextBlock x:Name="GcGen1Value" Foreground="LightGray" FontSize="14"/>
+                                        <TextBlock x:Name="GcGen2Value" Foreground="LightGray" FontSize="14"/>
+                                    </StackPanel>
                                 </StackPanel>
-                            </StackPanel>
-                        </Border>
+                            </Border>
 
-                        <!-- Disk -->
-                        <Border Grid.Row="1" Grid.Column="0" Background="#252526" CornerRadius="10" Margin="5" Padding="15">
-                            <StackPanel>
-                                <TextBlock Text="Disk I/O" FontSize="18" Foreground="White" Margin="0 0 0 5"/>
-                                <TextBlock x:Name="DiskValue" FontSize="28" Foreground="#FFD54F" FontWeight="Bold"/>
-                                <lvc:CartesianChart Height="100" Series="{Binding DiskSeries}" XAxes="{Binding XAxes}" YAxes="{Binding YAxes}" LegendPosition="Hidden" Background="Transparent" Foreground="White" Margin="0,10,0,0"/>
-                            </StackPanel>
-                        </Border>
+                            <!-- GPU -->
+                            <Border Grid.Row="0" Grid.Column="2" Background="#252526" CornerRadius="10" Margin="5" Padding="15">
+                                <StackPanel VerticalAlignment="Top">
+                                    <TextBlock Text="GPU Usage" FontSize="18" Foreground="White" Margin="0 0 0 5"/>
+                                    <TextBlock x:Name="GpuValue" FontSize="28" Foreground="#BA68C8" FontWeight="Bold"/>
+                                    <lvc:CartesianChart Height="100" Series="{Binding GpuSeries}" XAxes="{Binding XAxes}" YAxes="{Binding YAxes}" LegendPosition="Hidden" Background="Transparent" Foreground="White" Margin="0,10,0,0"/>
+                                    <StackPanel x:Name="GpuAdvancedPanel" Margin="0,10,0,0" Visibility="Collapsed">
+                                        <TextBlock x:Name="GpuTempValue" Foreground="LightGray" FontSize="14"/>
+                                        <TextBlock x:Name="GpuClockValue" Foreground="LightGray" FontSize="14"/>
+                                        <TextBlock x:Name="GpuMemoryUsedValue" Foreground="LightGray" FontSize="14"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
 
-                        <!-- Network -->
-                        <Border Grid.Row="1" Grid.Column="1" Background="#252526" CornerRadius="10" Margin="5" Padding="15">
-                            <StackPanel>
-                                <TextBlock Text="Network Usage" FontSize="18" Foreground="White" Margin="0 0 0 5"/>
-                                <TextBlock x:Name="NetValue" FontSize="28" Foreground="#E57373" FontWeight="Bold"/>
-                                <lvc:CartesianChart Height="100" Series="{Binding NetworkSeries}" XAxes="{Binding XAxes}" YAxes="{Binding YAxes}" LegendPosition="Hidden" Background="Transparent" Foreground="White" Margin="0,10,0,0"/>
-                            </StackPanel>
-                        </Border>
+                            <!-- Disk -->
+                            <Border Grid.Row="1" Grid.Column="0" Background="#252526" CornerRadius="10" Margin="5" Padding="15">
+                                <StackPanel VerticalAlignment="Top">
+                                    <TextBlock Text="Disk I/O" FontSize="18" Foreground="White" Margin="0 0 0 5"/>
+                                    <TextBlock x:Name="DiskValue" FontSize="28" Foreground="#FFD54F" FontWeight="Bold"/>
+                                    <lvc:CartesianChart Height="100" Series="{Binding DiskSeries}" XAxes="{Binding XAxes}" YAxes="{Binding YAxes}" LegendPosition="Hidden" Background="Transparent" Foreground="White" Margin="0,10,0,0"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Network -->
+                            <Border Grid.Row="1" Grid.Column="1" Background="#252526" CornerRadius="10" Margin="5" Padding="15">
+                                <StackPanel VerticalAlignment="Top">
+                                    <TextBlock Text="Network Usage" FontSize="18" Foreground="White" Margin="0 0 0 5"/>
+                                    <TextBlock x:Name="NetValue" FontSize="28" Foreground="#E57373" FontWeight="Bold"/>
+                                    <lvc:CartesianChart Height="100" Series="{Binding NetworkSeries}" XAxes="{Binding XAxes}" YAxes="{Binding YAxes}" LegendPosition="Hidden" Background="Transparent" Foreground="White" Margin="0,10,0,0"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Output Log -->
+                            <Border Grid.Row="2" Grid.ColumnSpan="3" Background="#1A1A1A" CornerRadius="8" Margin="5" Padding="10">
+                                <StackPanel>
+                                    <TextBlock Text="Output Log" FontSize="16" Foreground="White" FontWeight="Bold" Margin="0 0 0 5"/>
+                                    <ScrollViewer Height="120" VerticalScrollBarVisibility="Auto">
+                                        <TextBox x:Name="OutputLog" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap"
+                                                 VerticalScrollBarVisibility="Auto" Background="#2D2D2D" Foreground="LightGray" FontSize="12"/>
+                                    </ScrollViewer>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
                     </Grid>
-                </Grid>
+                </ScrollViewer>
             </TabItem>
 
             <!-- System Info Tab -->

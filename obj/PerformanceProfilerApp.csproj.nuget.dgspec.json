@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\new folder\\VisualStudioCode\\PerformanceProfilerApp\\PerformanceProfilerApp.csproj": {}
+    "C:\\new folder\\Visual Studio\\Performance-Profiler-main\\Performance-Profiler-main\\PerformanceProfilerApp.csproj": {}
   },
   "projects": {
-    "D:\\new folder\\VisualStudioCode\\PerformanceProfilerApp\\PerformanceProfilerApp.csproj": {
+    "C:\\new folder\\Visual Studio\\Performance-Profiler-main\\Performance-Profiler-main\\PerformanceProfilerApp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\new folder\\VisualStudioCode\\PerformanceProfilerApp\\PerformanceProfilerApp.csproj",
+        "projectUniqueName": "C:\\new folder\\Visual Studio\\Performance-Profiler-main\\Performance-Profiler-main\\PerformanceProfilerApp.csproj",
         "projectName": "PerformanceProfilerApp",
-        "projectPath": "D:\\new folder\\VisualStudioCode\\PerformanceProfilerApp\\PerformanceProfilerApp.csproj",
+        "projectPath": "C:\\new folder\\Visual Studio\\Performance-Profiler-main\\Performance-Profiler-main\\PerformanceProfilerApp.csproj",
         "packagesPath": "C:\\Users\\kajus\\.nuget\\packages\\",
-        "outputPath": "D:\\new folder\\VisualStudioCode\\PerformanceProfilerApp\\obj\\",
+        "outputPath": "C:\\new folder\\Visual Studio\\Performance-Profiler-main\\Performance-Profiler-main\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -50,6 +50,10 @@
         "net8.0-windows7.0": {
           "targetAlias": "net8.0-windows",
           "dependencies": {
+            "LibreHardwareMonitorLib": {
+              "target": "Package",
+              "version": "[0.9.5-pre396, )"
+            },
             "LiveChartsCore": {
               "target": "Package",
               "version": "[2.0.0-rc5.4, )"
@@ -86,7 +90,7 @@
               "privateAssets": "none"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.201/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.203/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
